@@ -1,14 +1,22 @@
 package com.example.glleryapp.ui
 
-import  androidx.appcompat.app.AppCompatActivity
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
+import android.database.Cursor
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.provider.MediaStore
 import android.widget.TextView
 import androidx.appcompat.app.ActionBar
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.glleryapp.R
 import com.example.glleryapp.data.model.ImageModel
+import com.example.glleryapp.utils.ImagesGallery
 import kotlinx.android.synthetic.main.activity_gallery.*
-import kotlinx.android.synthetic.main.activity_gallery.view.*
+
 
 class GalleryActivity : AppCompatActivity() {
 
@@ -19,14 +27,14 @@ class GalleryActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_gallery)
         setupToolbar()
+        checkPermissions()
         setupRecyclerView()
     }
 
     private fun setupRecyclerView() {
         recyclerViewImages.adapter = imageAdapter
         recyclerViewImages.layoutManager = GridLayoutManager(this, 3)
-        imageAdapter.submitList(getData())
-
+        //imageAdapter.addItems(ImagesGallery.listOfImages(this))
     }
 
     private fun setupToolbar() {
@@ -36,16 +44,16 @@ class GalleryActivity : AppCompatActivity() {
         titleTxt?.text = getString(R.string.photo_choose)
     }
 
-    private fun getData(): ArrayList<ImageModel> {
-        val list = arrayListOf<ImageModel>()
-        list.add(ImageModel(image = R.drawable.aes))
-        list.add(ImageModel(image = R.drawable.aes))
-        list.add(ImageModel(image = R.drawable.aes))
-        list.add(ImageModel(image = R.drawable.aes))
-        list.add(ImageModel(image = R.drawable.aes))
-        list.add(ImageModel(image = R.drawable.aes))
-        list.add(ImageModel(image = R.drawable.aes))
-
-        return list
+    private fun checkPermissions() {
+        if ((checkSelfPermission( Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED)
+            && (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED)
+        ) {
+            val permission = arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE)
+            val permissionCoarse = arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            requestPermissions(permission, 1)
+            requestPermissions(permissionCoarse, 2)
+        } else {
+            imageAdapter.addItems(ImagesGallery.listOfImages(this))
+        }
     }
 }
